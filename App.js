@@ -49,7 +49,8 @@ export default function App() {
           paddingVertical: 5
         },
         tabBarActiveTintColor: 'aqua',
-        tabBarInactiveTintColor: 'grey',
+        tabBarInactiveTintColor: 'gray',
+        headerShown: false
       })}
       >
         <Tab.Screen name='Workout' component={WorkoutScreen} />
@@ -61,7 +62,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen name='TabNavigator' component={TabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
