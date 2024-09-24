@@ -5,7 +5,7 @@ import {
   Lato_400Regular
 } from "@expo-google-fonts/lato";
 
-const otdImage = require("../../assets/images/workoutOTD.png");
+const otdImage = require("../../assets/images/workoutotd.jpg");
 
 const WorkoutOTD = () => {
   let [fontsLoaded] = useFonts({
