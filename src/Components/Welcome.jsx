@@ -20,9 +20,6 @@ const Welcome = () => {
   }
   */
   let [fontsLoaded] = useFonts({
-    Caveat_400Regular,
-    Caveat_500Medium,
-    Caveat_600SemiBold,
     Caveat_700Bold,
   });
 
@@ -30,14 +27,14 @@ const Welcome = () => {
     return null;
   }
 
-  let fontSize = 30;
+  let fontSize = 35;
   let paddingVertical = 6;  
 
   return (
     <View>
       <Text style={{
         //fontFamily: "Kameron",
-        fontFamily: 'Caveat_400Regular',
+        fontFamily: 'Caveat_700Bold',
         fontSize: fontSize,
         textAlign: "center",
         color: '#92400e'

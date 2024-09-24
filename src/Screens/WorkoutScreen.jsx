@@ -1,11 +1,14 @@
 import React from 'react';
-import Welcome from '../Components/Welcome';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import Welcome from '../Components/Welcome';
+import WorkoutOTD from '../Components/WorkoutOTD';
 
 const WorkoutScreen = () => {
   return (
-    <SafeAreaView>
+    <SafeAreaView className='mx-[1%]'>
       <Welcome />
+      <WorkoutOTD />
     </SafeAreaView>
   );
 }
