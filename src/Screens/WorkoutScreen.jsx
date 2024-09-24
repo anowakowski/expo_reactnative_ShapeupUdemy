@@ -5,6 +5,7 @@ import Welcome from '../Components/Welcome';
 import WorkoutOTD from '../Components/WorkoutOTD';
 import Separator from '../Components/Separator';
 import Category from '../Components/Category';
+import Exercise from '../Components/Exercise';
 
 const WorkoutScreen = () => {
   return (
@@ -13,8 +14,11 @@ const WorkoutScreen = () => {
       <WorkoutOTD />
       <Separator />
       <Category />
+      <Separator />
+      <Exercise />
     </SafeAreaView>
   );
 }
 
 export default WorkoutScreen;
+
