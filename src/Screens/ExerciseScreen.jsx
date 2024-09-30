@@ -10,18 +10,49 @@ import React, { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import { getDownloadURL, ref } from "firebase/storage";
 import { storage } from "../../Firebase/config";
+import { Audio } from "expo-av";
+import BackButton from "../Components/BackButton";
+
+const countDownAudion = require("../../assets/audio/countdownaudio.mp3");
 
 const ExerciseScreen = () => {
   const route = useRoute();
   const { item } = route.params;
-  const initialTime = 60;
-  const minimumTime = 10;
+  const initialTime = 5;
+  const minimumTime = 5;
 
   const [gifUrl, setGifUrl] = useState(null);
   const [time, setTime] = useState(initialTime);
   const [isRunning, setIsRunning] = useState(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState(true);
+  const [countDownSound, setCountDownSound] = useState();
+
+  //console.log("countDownSound: ", countDownSound);
+
+  async function playSound() {
+    const { sound } = await Audio.Sound.createAsync(countDownAudion);
+    setCountDownSound(sound);
+
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        setIsAudioPlaying(false);
+      }
+    });
+
+    await sound.playAsync();
+    setIsAudioPlaying(true);
+  }
+
+  /*
+  useEffect(() => {
+    return countDownSound
+      ? () => {
+          countDownSound.unloadAsync();
+        }
+      : undefined;
+  }, [countDownSound]);
+  */
 
   const fetchGifUrl = async () => {
     try {
@@ -54,6 +85,11 @@ const ExerciseScreen = () => {
     setIsRunning(false);
     setIsFirstTime(true);
     setTime(initialTime);
+
+    if (countDownSound && isAudioPlaying) {
+      countDownSound.stopAsync();
+      setIsAudioPlaying(false);
+    }
   };
 
   useEffect(() => {
@@ -62,6 +98,9 @@ const ExerciseScreen = () => {
     if (isRunning && time > 0) {
       countDownInterval = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
+        if (time === 4) {
+          playSound();
+        }
       }, 1000);
     } else {
       setIsRunning(false);
@@ -98,6 +137,7 @@ const ExerciseScreen = () => {
           <ActivityIndicator size={"large"} color={"grey"} />
         </View>
       )}
+      <BackButton />
       <ScrollView>
         <View className="mt-4 mx-3">
           <Text className="text-2xl font-bold text-center mb-1">
@@ -149,8 +189,15 @@ const ExerciseScreen = () => {
           </TouchableOpacity>
         </View>
         <View className="mt-4 flex-row items-center justify-center mb-10 space-x-4">
-          <TouchableOpacity onPress={isRunning ? handlePause : handleStart}>
-            <Text className="text-blue-500 text-xl py-2 border rounded-lg border-blue-500 px-4">
+          <TouchableOpacity
+            onPress={isRunning ? handlePause : handleStart}
+            disabled={time === 0}
+          >
+            <Text
+              className={`text-blue-500 text-xl py-2 border rounded-lg border-blue-500 px-4 ${
+                time === 0 ? "opacity-50" : ""
+              }`}
+            >
               {isRunning ? "PAUSE" : "START"}
             </Text>
           </TouchableOpacity>
