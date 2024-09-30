@@ -8,16 +8,17 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
-import { getDownloadURL, ref } from "firebase/storage";
+import { getDownloadURL, ref, listAll } from "firebase/storage";
 import { storage } from "../../Firebase/config";
 import { Audio } from "expo-av";
 import BackButton from "../Components/BackButton";
+import ExercisesData from "../../exercise_data.json";
 
 const countDownAudion = require("../../assets/audio/countdownaudio.mp3");
 
-const ExerciseScreen = () => {
+const CategoryExerciseScreen = () => {
   const route = useRoute();
-  const { item } = route.params;
+  const { intensity } = route.params;
   const initialTime = 5;
   const minimumTime = 5;
 
@@ -27,8 +28,78 @@ const ExerciseScreen = () => {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState(true);
   const [countDownSound, setCountDownSound] = useState();
+  const [exercises, setExercises] = useState([]);
+  const [categoryExercises, setCategoryExercises] = useState([]);
 
-  //console.log("countDownSound: ", countDownSound);
+  const fetExercisesByIntensity = async (intensity) => {
+    try {
+      const folderPath = `${intensity}Excersises`; //work only with Beginner for example because its wrong names
+      const storageRef = ref(storage, folderPath);
+
+      console.log("run fetExercisesByIntensity");
+      //const allItems = await listAll(storageRef);
+      const matchingExercises = [];
+      listAll(storageRef).then((res) => {
+        res.items.forEach((item) => {
+          //console.log("item", item);
+          const fileName = item.name.split("/").pop();
+          const matchingExercise = ExercisesData.find(
+            (x) => x.gif_url === fileName
+          );
+
+          //console.log("matchingExercise: ", matchingExercise)
+          if (matchingExercise) {
+            matchingExercises.push(matchingExercise);
+          }
+        });
+        setExercises(matchingExercises);
+      });
+
+      //console.log("exercises: ", exercises);
+
+      //console.log("allItems: ", allItems);
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetExercisesByIntensity(intensity);
+  }, []);
+
+  const fetchGifUrl = async (exercise) => {
+    try {
+      const folderPath = `${intensity}Excersises/`;
+      const storageRef = ref(storage, folderPath + exercise.gif_url);
+      const url = await getDownloadURL(storageRef);
+      //console.log("url", url);
+      return url;
+    } catch (error) {
+      console.log("error: ", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const fetchGifUrlForExercises = async () => {
+      const exerciseWithGifUrl = await Promise.all(
+        exercises.map(async (exercise) => {
+          const gifUrl = await fetchGifUrl(exercise);
+          return {
+            ...exercise,
+            gif_url: gifUrl,
+          };
+        })
+      );
+      setCategoryExercises(exerciseWithGifUrl);
+    };
+
+    fetchGifUrlForExercises();
+  }, [exercises]);
+
+
+  console.log("categoryExercises: ", categoryExercises);
+  
 
   async function playSound() {
     const { sound } = await Audio.Sound.createAsync(countDownAudion);
@@ -43,31 +114,6 @@ const ExerciseScreen = () => {
     await sound.playAsync();
     setIsAudioPlaying(true);
   }
-
-  /*
-  useEffect(() => {
-    return countDownSound
-      ? () => {
-          countDownSound.unloadAsync();
-        }
-      : undefined;
-  }, [countDownSound]);
-  */
-
-  const fetchGifUrl = async () => {
-    try {
-      const storageRef = ref(storage, `AllExercieses/${item.gif_url}`);
-      const url = await getDownloadURL(storageRef);
-      //console.log("url", url);
-      setGifUrl(url);
-    } catch (error) {
-      console.log("error: ", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchGifUrl();
-  }, []);
 
   const handleDecreaseTime = () => {
     if (!isRunning && time > minimumTime) {
@@ -127,7 +173,6 @@ const ExerciseScreen = () => {
     }
   };
 
-  //console.log(item);
   return (
     <View className="flex-1">
       {gifUrl ? (
@@ -141,26 +186,26 @@ const ExerciseScreen = () => {
       <ScrollView>
         <View className="mt-4 mx-3">
           <Text className="text-2xl font-bold text-center mb-1">
-            {item.title}
+            {/*item.title*/}
           </Text>
           <View className="flex-row">
-            {item.category.split(",").map((cat, index) => (
+            {/*item.category.split(",").map((cat, index) => (
               <View key={index} className="mr-2">
                 <View className="bg-gray-300 px-2 rounded-2xl pb-1">
                   <Text className="text-fuchsia-500">#{cat}</Text>
                 </View>
               </View>
-            ))}
+            ))*/}
           </View>
           <View className="flex-row items-center space-x-2 mt-2">
             <Text className="font-semibold text-blue-500">Intensity:</Text>
             <Text className="text-cyan-400 italic text-base">
-              {item.intensity}
+              {/*item.intensity*/}
             </Text>
           </View>
           <Text className="text-xl font-semibold mt-4">Instructions:</Text>
           <View className="mt-2">
-            {item.instructions.map((instruction) => (
+            {/*item.instructions.map((instruction) => (
               <View
                 key={instruction.step}
                 className="flex-row items-center mb-2"
@@ -170,7 +215,7 @@ const ExerciseScreen = () => {
                 </Text>
                 <Text className="ml-2 text-base">{instruction.text}</Text>
               </View>
-            ))}
+            ))*/}
           </View>
         </View>
         <View className="mt-4 flex-row items-center justify-center space-x-3">
@@ -212,4 +257,4 @@ const ExerciseScreen = () => {
   );
 };
 
-export default ExerciseScreen;
+export default CategoryExerciseScreen;

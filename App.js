@@ -9,6 +9,7 @@ import WorkoutScreen from './src/Screens/WorkoutScreen';
 import TimerScreen from './src/Screens/TimerScreen';
 import CalculationScreen from './src/Screens/CalculationScreen';
 import ExerciseScreen from './src/Screens/ExerciseScreen';
+import CategoryExerciseScreen from './src/Screens/CategoryExerciseScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -65,6 +66,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen name='TabNavigator' component={TabNavigator} />
         <Stack.Screen name='Exercise' component={ExerciseScreen} />
+        <Stack.Screen name='CategoryExercise' component={CategoryExerciseScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
