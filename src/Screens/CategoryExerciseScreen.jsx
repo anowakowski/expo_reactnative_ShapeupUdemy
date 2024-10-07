@@ -13,6 +13,7 @@ import { storage } from "../../Firebase/config";
 import { Audio } from "expo-av";
 import BackButton from "../Components/BackButton";
 import ExercisesData from "../../exercise_data.json";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const countDownAudion = require("../../assets/audio/countdownaudio.mp3");
 
@@ -30,6 +31,7 @@ const CategoryExerciseScreen = () => {
   const [countDownSound, setCountDownSound] = useState();
   const [exercises, setExercises] = useState([]);
   const [categoryExercises, setCategoryExercises] = useState([]);
+  const [exerciseIndex, setExerciseIndex] = useState(0);
 
   const fetExercisesByIntensity = async (intensity) => {
     try {
@@ -97,9 +99,7 @@ const CategoryExerciseScreen = () => {
     fetchGifUrlForExercises();
   }, [exercises]);
 
-
-  console.log("categoryExercises: ", categoryExercises);
-  
+  //console.log("categoryExercises: ", categoryExercises);
 
   async function playSound() {
     const { sound } = await Audio.Sound.createAsync(countDownAudion);
@@ -173,86 +173,125 @@ const CategoryExerciseScreen = () => {
     }
   };
 
+  const currentExercise = categoryExercises[exerciseIndex];
+
+  const navigateToNextExercise = () => {
+   if (exerciseIndex < categoryExercises.length - 1) {
+    setExerciseIndex(exerciseIndex + 1);
+   }
+  }
+
+  const navigateToPreviousExercise = () => {
+    if (exerciseIndex > 0) {
+     setExerciseIndex(exerciseIndex - 1);
+    }
+   }
+
   return (
     <View className="flex-1">
-      {gifUrl ? (
-        <Image source={{ uri: gifUrl }} className="w-full h-80" />
+      {currentExercise ? (
+        <>
+          <Image
+            source={{ uri: currentExercise.gif_url }}
+            className="w-full h-80"
+          />
+
+          <BackButton />
+          <ScrollView>
+            <View className="mt-4 mx-3">
+              <Text className="text-2xl font-bold text-center mb-1">
+                {currentExercise.title}
+              </Text>
+              <View className="flex-row">
+                {currentExercise.category.split(",").map((cat, index) => (
+                  <View key={index} className="mr-2">
+                    <View className="bg-gray-300 px-2 rounded-2xl pb-1">
+                      <Text className="text-fuchsia-500">#{cat}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+
+              <View className="flex-row items-center space-x-2 mt-2">
+                <Text className="font-semibold  text-blue-500">Intensity:</Text>
+                <Text className="text-cyan-400 italic text-base">
+                  {currentExercise.intensity}
+                </Text>
+              </View>
+              <Text className="text-xl font-semibold mt-4">Instructions:</Text>
+              <View className="mt-2">
+                {currentExercise.instructions.map((instruction) => (
+                  <View
+                    key={instruction.step}
+                    className="flex-row items-center mb-2"
+                  >
+                    <Text className="text-base text-gray-600">
+                      {instruction.step}.
+                    </Text>
+                    <Text className="ml-2 text-base">{instruction.text}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View className="mt-4 flex-row items-center justify-center space-x-3">
+              <TouchableOpacity
+                onPress={handleDecreaseTime}
+                className="items-center justify-center w-14 h-14 bg-red-500 rounded-full"
+              >
+                <Text className="text-white text-5xl">-</Text>
+              </TouchableOpacity>
+              <Text className="text-xl font-bold">{time} secs</Text>
+              <TouchableOpacity
+                onPress={handleIncreaseTime}
+                className="items-center justify-center w-14 h-14 bg-green-500 rounded-full"
+              >
+                <Text className="text-white text-3xl">+</Text>
+              </TouchableOpacity>
+            </View>
+            <View className="mt-4 flex-row items-center justify-center mb-10 space-x-4">
+              <TouchableOpacity
+                onPress={navigateToPreviousExercise}
+                disabled={exerciseIndex === 0}
+                className={` ${exerciseIndex === 0 ? "opacity-50" : ""}`}
+              >
+                <AntDesign name="leftcircleo" size={35} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={isRunning ? handlePause : handleStart}
+                disabled={time === 0}
+              >
+                <Text
+                  className={`text-blue-500 text-xl py-2 border rounded-lg border-blue-500 px-4 ${
+                    time === 0 ? "opacity-50" : ""
+                  }`}
+                >
+                  {isRunning ? "PAUSE" : "START"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleReset}>
+                <Text className="text-gray-500 text-xl py-2 border rounded-lg border-gray-500 px-4">
+                  RESET
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={navigateToNextExercise}
+                disabled={exerciseIndex === categoryExercises.length - 1}
+                className={` ${
+                  exerciseIndex === categoryExercises.length - 1
+                    ? "opacity-50"
+                    : ""
+                }`}
+              >
+                <AntDesign name="rightcircleo" size={35} color="black" />
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </>
       ) : (
         <View className="items-center justify-center w-full h-80">
-          <ActivityIndicator size={"large"} color={"grey"} />
+          <ActivityIndicator size={"large"} color={"gray"} />
         </View>
       )}
-      <BackButton />
-      <ScrollView>
-        <View className="mt-4 mx-3">
-          <Text className="text-2xl font-bold text-center mb-1">
-            {/*item.title*/}
-          </Text>
-          <View className="flex-row">
-            {/*item.category.split(",").map((cat, index) => (
-              <View key={index} className="mr-2">
-                <View className="bg-gray-300 px-2 rounded-2xl pb-1">
-                  <Text className="text-fuchsia-500">#{cat}</Text>
-                </View>
-              </View>
-            ))*/}
-          </View>
-          <View className="flex-row items-center space-x-2 mt-2">
-            <Text className="font-semibold text-blue-500">Intensity:</Text>
-            <Text className="text-cyan-400 italic text-base">
-              {/*item.intensity*/}
-            </Text>
-          </View>
-          <Text className="text-xl font-semibold mt-4">Instructions:</Text>
-          <View className="mt-2">
-            {/*item.instructions.map((instruction) => (
-              <View
-                key={instruction.step}
-                className="flex-row items-center mb-2"
-              >
-                <Text className="text-base text-gray-600">
-                  {instruction.step}.
-                </Text>
-                <Text className="ml-2 text-base">{instruction.text}</Text>
-              </View>
-            ))*/}
-          </View>
-        </View>
-        <View className="mt-4 flex-row items-center justify-center space-x-3">
-          <TouchableOpacity
-            onPress={handleDecreaseTime}
-            className="items-center justify-center w-14 h-14 bg-red-500 rounded-full"
-          >
-            <Text className="text-white text-3xl">-</Text>
-          </TouchableOpacity>
-          <Text className="text-xl font-bold">{time} secs</Text>
-          <TouchableOpacity
-            onPress={handleIncreaseTime}
-            className="items-center justify-center w-14 h-14 bg-green-500 rounded-full"
-          >
-            <Text className="text-white text-3xl">+</Text>
-          </TouchableOpacity>
-        </View>
-        <View className="mt-4 flex-row items-center justify-center mb-10 space-x-4">
-          <TouchableOpacity
-            onPress={isRunning ? handlePause : handleStart}
-            disabled={time === 0}
-          >
-            <Text
-              className={`text-blue-500 text-xl py-2 border rounded-lg border-blue-500 px-4 ${
-                time === 0 ? "opacity-50" : ""
-              }`}
-            >
-              {isRunning ? "PAUSE" : "START"}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleReset}>
-            <Text className="text-gray-500 text-xl py-2 border rounded-lg border-blue-500 px-4">
-              RESET
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
     </View>
   );
 };
